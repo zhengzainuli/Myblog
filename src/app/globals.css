@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #f4e4ba;
+  --color-secondary: #ffffff;
+  --color-accent: #3e2731;
+  --color-success: #4caf50;
+  
+  --font-press-start: var(--font-press-start-2p), monospace;
+  --font-silkscreen: var(--font-silkscreen-var), sans-serif;
+}
+
+:root {
+  --background: var(--color-primary);
+  --foreground: var(--color-accent);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-silkscreen);
+  image-rendering: pixelated;
+  position: relative;
+}
+
+body::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.08) 50%
+  ),
+  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 4px, 3px 100%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+body::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(30,10,10,0.6) 100%);
+  z-index: 9998;
+  pointer-events: none;
+}
+
+.pixel-bg {
+  background-image: 
+    radial-gradient(var(--color-accent) 1px, transparent 1px),
+    radial-gradient(var(--color-accent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  background-color: #e2cfa5; /* Slightly darker than primary for better contrast */
+  opacity: 0.9;
+}
+
+@utility pixel-border {
+  box-shadow: 
+    -4px 0 0 0 var(--color-accent),
+    4px 0 0 0 var(--color-accent),
+    0 -4px 0 0 var(--color-accent),
+    0 4px 0 0 var(--color-accent);
+  margin: 4px; /* offset the box-shadow */
+}

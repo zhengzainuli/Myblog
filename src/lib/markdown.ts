@@ -61,8 +61,36 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     const fileContents = await res.text();
     const { data, content } = matter(fileContents);
 
+    // Automatically rewrite relative image URLs to point to the GitHub Raw URL
+    // e.g. ![alt](my-image.png) -> ![alt](https://raw.githubusercontent.com/.../content/blog/my-image.png)
+    // It ignores URLs that already start with http://, https://, or /
+    let rewrittenContent = content.replace(
+      /!\[([^\]]*)\]\((?!http|\/)([^)]+)\)/g,
+      (match, alt, src) => {
+        try {
+          const absoluteUrl = new URL(src, `${RAW_URL_BASE}/`).href;
+          return `![${alt}](${absoluteUrl})`;
+        } catch (e) {
+          return match; // Fallback to original if URL parsing fails
+        }
+      }
+    );
+
+    // Also handle HTML <img> tags with relative paths
+    rewrittenContent = rewrittenContent.replace(
+      /<img([^>]+)src=["'](?!http|\/)([^"']+)["']([^>]*)>/gi,
+      (match, prefix, src, suffix) => {
+        try {
+          const absoluteUrl = new URL(src, `${RAW_URL_BASE}/`).href;
+          return `<img${prefix}src="${absoluteUrl}"${suffix}>`;
+        } catch (e) {
+          return match;
+        }
+      }
+    );
+
     // Convert markdown to HTML string
-    const htmlContent = (await remark().use(html).process(content)).toString();
+    const htmlContent = (await remark().use(html).process(rewrittenContent)).toString();
 
     return {
       slug: realSlug,

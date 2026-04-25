@@ -26,6 +26,8 @@ const iconMap: Record<string, React.ReactNode> = {
 export default function Home() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [posts, setPosts] = useState<PostMetaData[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 6;
 
   useEffect(() => {
     // Fetch posts from our API route
@@ -34,6 +36,9 @@ export default function Home() {
       .then(data => setPosts(data))
       .catch(err => console.error("Failed to load posts", err));
   }, []);
+
+  const totalPages = Math.max(1, Math.ceil(posts.length / postsPerPage));
+  const currentPosts = posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 
   return (
     <PageTransition>
@@ -62,7 +67,7 @@ export default function Home() {
             <div className="flex flex-col items-center mb-10 w-full">
               <div className="relative w-32 h-32 pixel-border border-[#5c3a21] bg-[#1a1216] flex items-center justify-center overflow-hidden mb-4 shadow-[6px_6px_0_0_rgba(0,0,0,0.5)] z-10 group">
                 <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Dong_Zhiqiang.jpg/750px-Dong_Zhiqiang.jpg" 
+                  src="/avatar.png" 
                   alt="Profile" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   style={{ imageRendering: 'auto' }}
@@ -118,11 +123,11 @@ export default function Home() {
                 <h2 className="font-press-start text-xl md:text-2xl text-accent">最新任务</h2>
                 <PixelTorch />
               </div>
-              <span className="font-press-start text-xs hidden sm:block">PAGE 1/5</span>
+              <span className="font-press-start text-xs hidden sm:block">PAGE {currentPage}/{totalPages}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map((post, index) => (
+              {currentPosts.map((post, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
@@ -156,13 +161,38 @@ export default function Home() {
             </div>
 
             {/* Pagination */}
-            <div className="mt-8 flex justify-center gap-2">
-              <PixelButton variant="secondary" className="px-2 py-1">&lt;</PixelButton>
-              <PixelButton variant="primary" className="px-3 py-1">1</PixelButton>
-              <PixelButton variant="secondary" className="px-3 py-1">2</PixelButton>
-              <PixelButton variant="secondary" className="px-3 py-1">3</PixelButton>
-              <PixelButton variant="secondary" className="px-2 py-1">&gt;</PixelButton>
-            </div>
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center gap-2">
+                <PixelButton 
+                  variant="secondary" 
+                  className={`px-2 py-1 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  &lt;
+                </PixelButton>
+                
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <PixelButton 
+                    key={i}
+                    variant={currentPage === i + 1 ? "primary" : "secondary"} 
+                    className="px-3 py-1"
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </PixelButton>
+                ))}
+
+                <PixelButton 
+                  variant="secondary" 
+                  className={`px-2 py-1 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  &gt;
+                </PixelButton>
+              </div>
+            )}
           </PixelContainer>
         </main>
       </div>

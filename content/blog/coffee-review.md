@@ -10,3 +10,4 @@ npcDialog: "喝下这瓶药水。它能恢复 50 点 MP，并赋予你 4 小时�
 它有着深沉泥土的风味，并带有一丝黑巧克力的香气。当深夜面对那些顽固的 bug 时，它是最完美的伴侣。
 
 我给这款咖啡打 9/10 分。强烈推荐给所有的全栈开发者。
+<img width="747" height="636" alt="file_1777094459348_244" src="https://github.com/user-attachments/assets/3f959667-b0dd-441f-9932-49c8f37cda70" />

@@ -104,13 +104,13 @@ export default function Home() {
 
             {/* Navigation Menu */}
             <nav className="w-full flex flex-col gap-3">
-              <PixelButton variant="primary" className="w-full flex justify-start">
+              <PixelButton variant="primary" href="/" className="w-full flex justify-start">
                 <AnimatedNavIcon icon={<HomeIcon size={16} />} label="回到主城" />
               </PixelButton>
-              <PixelButton variant="secondary" className="w-full flex justify-start">
+              <PixelButton variant="secondary" href="/blog/about" className="w-full flex justify-start">
                 <AnimatedNavIcon icon={<User size={16} />} label="关于勇者" />
               </PixelButton>
-              <PixelButton variant="secondary" className="w-full flex justify-start">
+              <PixelButton variant="secondary" href="/blog/adventure-log" className="w-full flex justify-start">
                 <AnimatedNavIcon icon={<FileText size={16} />} label="冒险日志" />
               </PixelButton>
               <PixelButton variant="secondary" className="w-full flex justify-start" onClick={() => setIsContactOpen(true)}>

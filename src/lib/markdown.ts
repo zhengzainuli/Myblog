@@ -1,10 +1,14 @@
-import fs from 'fs';
-import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
 
-const postsDirectory = path.join(process.cwd(), 'content/blog');
+const GITHUB_REPO = 'zhengzainuli/Myblog';
+const GITHUB_BRANCH = 'main';
+const CONTENT_PATH = 'content/blog';
+
+// GitHub API base URLs
+const API_URL = `https://api.github.com/repos/${GITHUB_REPO}/contents/${CONTENT_PATH}?ref=${GITHUB_BRANCH}`;
+const RAW_URL_BASE = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${CONTENT_PATH}`;
 
 export interface PostMetaData {
   slug: string;
@@ -18,38 +22,65 @@ export interface Post extends PostMetaData {
   content: string;
 }
 
-// Get all slugs
-export function getPostSlugs() {
-  if (!fs.existsSync(postsDirectory)) return [];
-  return fs.readdirSync(postsDirectory).filter(file => file.endsWith('.md'));
+// Get all slugs from GitHub
+export async function getPostSlugs(): Promise<string[]> {
+  try {
+    const res = await fetch(API_URL, { 
+      next: { revalidate: 60 } // Revalidate every 60 seconds
+    });
+    
+    if (!res.ok) {
+      console.error('Failed to fetch from GitHub API:', await res.text());
+      return [];
+    }
+
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+
+    return data
+      .filter((file: any) => file.name.endsWith('.md'))
+      .map((file: any) => file.name);
+  } catch (error) {
+    console.error('Error fetching slugs from GitHub:', error);
+    return [];
+  }
 }
 
-// Get single post by slug
+// Get single post by slug from GitHub
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   const realSlug = slug.replace(/\.md$/, '');
-  const fullPath = path.join(postsDirectory, `${realSlug}.md`);
-  
-  if (!fs.existsSync(fullPath)) return null;
+  const rawUrl = `${RAW_URL_BASE}/${realSlug}.md`;
 
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const { data, content } = matter(fileContents);
+  try {
+    const res = await fetch(rawUrl, {
+      next: { revalidate: 60 } // Revalidate every 60 seconds
+    });
 
-  // Convert markdown to HTML string
-  const htmlContent = (await remark().use(html).process(content)).toString();
+    if (!res.ok) return null;
 
-  return {
-    slug: realSlug,
-    title: data.title,
-    date: data.date,
-    icon: data.icon || 'ImageIcon',
-    npcDialog: data.npcDialog,
-    content: htmlContent,
-  };
+    const fileContents = await res.text();
+    const { data, content } = matter(fileContents);
+
+    // Convert markdown to HTML string
+    const htmlContent = (await remark().use(html).process(content)).toString();
+
+    return {
+      slug: realSlug,
+      title: data.title,
+      date: data.date,
+      icon: data.icon || 'ImageIcon',
+      npcDialog: data.npcDialog,
+      content: htmlContent,
+    };
+  } catch (error) {
+    console.error(`Error fetching post ${slug} from GitHub:`, error);
+    return null;
+  }
 }
 
 // Get all posts sorted by date
 export async function getAllPosts(): Promise<PostMetaData[]> {
-  const slugs = getPostSlugs();
+  const slugs = await getPostSlugs();
   const postsPromises = slugs.map(async (slug) => {
     const post = await getPostBySlug(slug);
     return post as Post;

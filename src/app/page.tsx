@@ -29,6 +29,19 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 6;
 
+  // Calculate age based on birth date (December 2003)
+  const calculateAge = () => {
+    const birthDate = new Date(2003, 11); // Month is 0-indexed, so 11 is December
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+  const currentAge = calculateAge();
+
   useEffect(() => {
     // Fetch posts from our API route
     fetch('/api/posts')
@@ -77,14 +90,14 @@ export default function Home() {
               
               <div className="w-full max-w-[200px] bg-[#fffdf0] p-3 pixel-border shadow-[4px_4px_0_0_rgba(0,0,0,0.3)] z-20 -mt-8 relative">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-2 bg-[#8b5a2b] pixel-border border-b-0"></div>
-                <h2 className="font-press-start text-[10px] text-center mb-2 text-[#3e2731]">Dong Zhiqiang</h2>
+                <h2 className="font-press-start text-[10px] text-center mb-2 text-[#3e2731]">Tao</h2>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="font-bold text-[#b91c1c]">HP</span>
                   <span className="font-silkscreen font-bold">99/99</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="font-bold text-[#f59e0b]">LV</span>
-                  <span className="font-silkscreen font-bold">22</span>
+                  <span className="font-silkscreen font-bold">{currentAge}</span>
                 </div>
               </div>
             </div>
